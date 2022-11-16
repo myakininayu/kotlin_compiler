@@ -19,7 +19,10 @@ void printLong(long int i);
 void printFloat(float f);
 void printDouble(double d);
 void printChar(const char c);
+void printString(const char* str);
+void printRawString(const char* str);
 void printIdentifier(const char* id);
+void printBackticksIdentifier(const char* id);
 void printErr(const char* errMsg, int lineNum);
 void removeChar(char * str, char charToRemmove);
 
@@ -34,6 +37,8 @@ DEC_NUMBER({DEC_DIGIT}+[_]*)*{DEC_DIGIT}+
 EXPONENT[eE][+-]?{DEC_NUMBER}
 DOUBLE({DEC_NUMBER}\.{DEC_NUMBER})?{EXPONENT}
 
+%x RAW_STRING
+%x BACKTICKS_IDENTIFIER
 %x MULTILINE_COMMENT
 %x STRING
 %x CHAR
@@ -50,6 +55,43 @@ char currentString[1000];
 char buffer[100];
 
 %}
+
+\`                                      {
+                                            currentString[0] = '\0';
+                                            BEGIN(BACKTICKS_IDENTIFIER);
+                                        }
+
+<BACKTICKS_IDENTIFIER>[^\`.:\/\[\]<>]+  {
+                                            strcat(currentString, yytext);
+                                        }
+
+<BACKTICKS_IDENTIFIER>[.:\/\[\]<>]+     {
+                                            printErr("Error! Name contains illegal characters", yylineno);
+                                        }
+
+<BACKTICKS_IDENTIFIER>\`                {
+                                            printBackticksIdentifier(currentString);
+                                            BEGIN(INITIAL);
+                                        }
+
+
+\"\"\"                                  {
+                                            currentString[0] = '\0';
+                                            BEGIN(RAW_STRING);
+                                        }
+
+<RAW_STRING>[^\"]*                      {
+                                            strcat(currentString, yytext);
+                                        }
+
+<RAW_STRING>(\\?\"){1,2}                {
+                                            strcat(currentString, yytext);
+                                        }
+
+<RAW_STRING>\"\"\"                      {
+                                            printRawString(currentString);
+                                            BEGIN(INITIAL);
+                                        }
 
 \/\*                                    {
                                             currentString[0] = '\0';
@@ -84,16 +126,12 @@ char buffer[100];
                                         }
 
 <STRING>\"                              {
-                                            printMLComment(currentString);
+                                            printString(currentString);
                                             BEGIN(INITIAL);
                                         }
 
 <CHAR>\'                                {
-                                            if (currentString[0] == '\0')
-                                            {
-                                                printErr("Error! Found an empty char", yylineno);
-                                            }
-                                            else if (currentString[1] != '\0')
+                                            if (currentString[1] != '\0')
                                             {
                                                 printErr("Error! More than one character in a char literal", yylineno);
                                             }
@@ -104,7 +142,7 @@ char buffer[100];
                                             BEGIN(INITIAL);
                                         }
 
-<STRING,CHAR>[^\\\"\\\n]+               {
+<STRING,CHAR>[^\\\"\'\n]+               {
                                             strcat(currentString, yytext);
                                         }
 
@@ -130,12 +168,12 @@ char buffer[100];
                                             strcat(currentString, "\$");
                                         }
 
-<STRING,CHAR>\n                         {
-                                            printErr("Error! Expected end of string but found end of line!", yylineno);
+<STRING>\n                              {
+                                            printErr("Error! Expected end of string/char but found end of line!", yylineno);
                                             BEGIN(INITIAL);
                                         }
 
-<STRING,CHAR,MULTILINE_COMMENT><<EOF>>                  {
+<STRING,CHAR,MULTILINE_COMMENT><<EOF>>  {
                                             printErr("Error! expected end of string but found end of file!", yylineno);
                                             BEGIN(INITIAL);
                                         }
@@ -364,12 +402,12 @@ void removeChar(char * str, char charToRemmove){
 
 void printMLComment(const char* comment)
 {
-    printf("Found multiline comment: \"%s\"\n", comment);
+    printf("Found multiline comment: \n\"%s\"\n\n", comment);
 }
 
 void printONComment(const char* comment)
 {
-    printf("Found one line comment: \"%s\"\n", comment);
+    printf("Found one line comment: \n\"%s\"\n\n", comment);
 }
 
 void printKeyword(const char* keyword)
@@ -417,9 +455,24 @@ void printChar(const char c)
     printf("Found char: %c\n", c);
 }
 
+void printString(const char* str)
+{
+    printf("Found string: \n%s\n\n", str);
+}
+
+void printRawString(const char* str)
+{
+    printf("Found RAW string: \n\"\"\"%s\"\"\"\n\n", str);
+}
+
 void printIdentifier(const char* id)
 {
     printf("Found identifier: %s\n", id);
+}
+
+void printBackticksIdentifier(const char* id)
+{
+    printf("Found identifier in backticks: %s\n", id);
 }
 
 void printErr(const char* errMsg, int lineNum)

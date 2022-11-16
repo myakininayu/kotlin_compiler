@@ -1,0 +1,50 @@
+val e: String = "das"
+const val c = 5
+
+fun main(args: Array<String>) {
+    
+    //comment
+    //simpleFunction()
+    /*println(text)
+    println(text2)
+    println(text3)
+    val oneChar = '1' 
+    */
+
+    val a = "Name"
+    var b = c * 5 - 2+1/7
+    val text = "Simple " + " " + a + " " + " test"
+    val oneChar = '1'
+    val rewre = "1231"
+
+    println(oneChar)
+    print("0")
+    simpleFunction()
+}
+
+
+fun simpleFunction(){
+    val `while= 6 = 6` = '6';
+    val `{} ` = """
+        ${
+		"
+        `while= 6 = 6`""
+    }
+	
+	\"
+       |
+       |\n\n\nr\n\r\nr\n\r\n\\rn\
+       | 
+	   \"\"
+    
+    """
+    val `     ads` = "0"
+    var b = "$``"
+    val `asd#,!!!if` = '5'
+    print(`{} `);
+	val price = """
+		${'$'}_9.99
+	"""
+    
+}
+val m = "$[]"
