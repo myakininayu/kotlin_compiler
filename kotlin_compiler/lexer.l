@@ -286,33 +286,46 @@ vararg                                  { printKeyword(yytext); }
 "/"                                     { printArithmeticOperator(yytext); }
 "%"                                     { printArithmeticOperator(yytext); }
 
-"=="                                    { printComparisonOperator(yytext); }
-"!="                                    { printComparisonOperator(yytext); }
-"<="                                    { printComparisonOperator(yytext); }
-">="                                    { printComparisonOperator(yytext); }
-">"                                     { printComparisonOperator(yytext); }
-"<"                                     { printComparisonOperator(yytext); }
+"="                                     { printf("Found assign operator: %s\n", yytext); }
 
 "+="                                    { printArithmeticOperator(yytext); }
 "-="                                    { printArithmeticOperator(yytext); }
 "*="                                    { printArithmeticOperator(yytext); }
 "/="                                    { printArithmeticOperator(yytext); }
+"%="                                    { printArithmeticOperator(yytext); }
+
+"++"                                    { printArithmeticOperator(yytext); }
+"--"                                    { printArithmeticOperator(yytext); }
 
 "&&"                                    { printLogicOperator(yytext); }
 "||"                                    { printLogicOperator(yytext); }
 "!"                                     { printLogicOperator(yytext); }
 
-"++"                                    { printArithmeticOperator(yytext); }
-"--"                                    { printArithmeticOperator(yytext); }
+"=="                                    { printComparisonOperator(yytext); }
+"!="                                    { printComparisonOperator(yytext); }
+"==="                                   { printComparisonOperator(yytext); }
+"!=="                                   { printComparisonOperator(yytext); }
+"<="                                    { printComparisonOperator(yytext); }
+">="                                    { printComparisonOperator(yytext); }
+">"                                     { printComparisonOperator(yytext); }
+"<"                                     { printComparisonOperator(yytext); }
 
-"="                                     { printf("Found assign operator: %s\n", yytext); }
+\[                                      { printf("%s\n", yytext); }
+\]                                      { printf("%s\n", yytext); }
 
+"?"                                     { printf("%s\n", yytext); }
 ":"                                     { printf("%s\n", yytext); }
-
 ";"                                     { printf("%s\n", yytext); }
-
 ","                                     { printf("%s\n", yytext); }
 "."                                     { printf("%s\n", yytext); }
+
+"?:"                                    { printf("%s\n", yytext); }
+"::"                                    { printf("%s\n", yytext); }
+"!!"                                    { printf("%s\n", yytext); }
+".."                                    { printf("%s\n", yytext); }
+"?."                                    { printf("%s\n", yytext); }
+
+"_"                                     { printf("%s\n", yytext); }
 
 \{                                      { printf("%s\n", yytext); }
 \}                                      { printf("%s\n", yytext); }
@@ -320,10 +333,8 @@ vararg                                  { printKeyword(yytext); }
 \(                                      { printf("%s\n", yytext); }
 \)                                      { printf("%s\n", yytext); }
 
-\[                                      { printf("%s\n", yytext); }
-\]                                      { printf("%s\n", yytext); }
-
 ->                                      { printf("%s\n", yytext); }
+@                                       { printf("%s\n", yytext); }
 
 DOUBLE                                  {
                                             buffer[0] = '\0';
