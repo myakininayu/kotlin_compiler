@@ -1,5 +1,5 @@
 val e: String = "das"
-const val c = 5
+const val c = 5 + 6L + 7l + 0xf0 + 0xfg + 0b0101 - 0b012 / 9.1 * 10f
 
 fun main(args: Array<String>) {
     

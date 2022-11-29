@@ -5,6 +5,7 @@
 %{
 
 #define _CRT_SECURE_NO_WARNINGS
+//#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <string.h>
 
@@ -15,6 +16,8 @@ void printLogicOperator(const char* o);
 void printComparisonOperator(const char* o);
 void printArithmeticOperator(const char* o);
 void printInteger(int i);
+void printHex(int i);
+void printBin(int i);
 void printLong(long int i);
 void printFloat(float f);
 void printDouble(double d);
@@ -35,7 +38,8 @@ HEX_DIGIT[0-9A-Fa-f]
 BIN_DIGIT[01]
 DEC_NUMBER({DEC_DIGIT}+[_]*)*{DEC_DIGIT}+
 EXPONENT[eE][+-]?{DEC_NUMBER}
-DOUBLE({DEC_NUMBER}\.{DEC_NUMBER})?{EXPONENT}
+DOUBLE({DEC_NUMBER})?\.{DEC_NUMBER}|({DEC_NUMBER})?\.?{DEC_NUMBER}{EXPONENT}
+DOUBLEF({DEC_NUMBER})?\.?{DEC_NUMBER}[fF]
 
 %x RAW_STRING
 %x BACKTICKS_IDENTIFIER
@@ -198,6 +202,11 @@ char buffer[100];
                                             strcat(currentString, "\'");
                                         }
 
+<STRING,CHAR>\\.                        {
+                                             printErr("Error! Illegal escape ", yylineno);
+                                             printf("Illegal escape: %s\n", yytext);
+                                        }
+
 
 as                                      { printKeyword(yytext); }
 as\?                                    { printKeyword(yytext); }
@@ -307,44 +316,63 @@ vararg                                  { printKeyword(yytext); }
 "!=="                                   { printComparisonOperator(yytext); }
 "<="                                    { printComparisonOperator(yytext); }
 ">="                                    { printComparisonOperator(yytext); }
-">"                                     { printComparisonOperator(yytext); }
-"<"                                     { printComparisonOperator(yytext); }
+">"                                     { printf("Found right angle bracket: %s\n", yytext); }
+"<"                                     { printf("Found left angle bracket: %s\n", yytext); }
 
-\[                                      { printf("%s\n", yytext); }
-\]                                      { printf("%s\n", yytext); }
+\[                                      { printf("Found token: %s\n", yytext); }
+\]                                      { printf("Found token: %s\n", yytext); }
 
-"?"                                     { printf("%s\n", yytext); }
-":"                                     { printf("%s\n", yytext); }
-";"                                     { printf("%s\n", yytext); }
-","                                     { printf("%s\n", yytext); }
-"."                                     { printf("%s\n", yytext); }
+"?"                                     { printf("Found token: %s\n", yytext); }
+":"                                     { printf("Found token: %s\n", yytext); }
+";"                                     { printf("Found token: %s\n", yytext); }
+","                                     { printf("Found token: %s\n", yytext); }
+"."                                     { printf("Found token: %s\n", yytext); }
 
-"?:"                                    { printf("%s\n", yytext); }
-"::"                                    { printf("%s\n", yytext); }
-"!!"                                    { printf("%s\n", yytext); }
-".."                                    { printf("%s\n", yytext); }
-"?."                                    { printf("%s\n", yytext); }
+"?:"                                    { printf("Found token: %s\n", yytext); }
+"::"                                    { printf("Found token: %s\n", yytext); }
+"!!"                                    { printf("Found token: %s\n", yytext); }
+".."                                    { printf("Found token: %s\n", yytext); }
+"?."                                    { printf("Found token: %s\n", yytext); }
 
-"_"                                     { printf("%s\n", yytext); }
+"_"                                     { printf("Found token: %s\n", yytext); }
 
-\{                                      { printf("%s\n", yytext); }
-\}                                      { printf("%s\n", yytext); }
+\{                                      { printf("Found token: %s\n", yytext); }
+\}                                      { printf("Found token: %s\n", yytext); }
 
-\(                                      { printf("%s\n", yytext); }
-\)                                      { printf("%s\n", yytext); }
+\(                                      { printf("Found token: %s\n", yytext); }
+\)                                      { printf("Found token: %s\n", yytext); }
 
-->                                      { printf("%s\n", yytext); }
-@                                       { printf("%s\n", yytext); }
+->                                      { printf("Found token: %s\n", yytext); }
+@                                       { printf("Found token: %s\n", yytext); }
 
-DOUBLE                                  {
+0x{HEX_DIGIT}+                          {
+                                            buffer[0] = '\0';
+                                            strcat(buffer, yytext);
+                                            char *p;
+                                            currentLong = strtol(buffer, &p, 16);
+                                            printHex(currentLong);
+                                        }
+
+0b{BIN_DIGIT}+                          {
+                                            buffer[0] = '\0';
+                                            strcat(buffer, yytext);
+                                            char dest[1000];
+                                            strcpy(dest, buffer+2);
+                                            char *p;
+                                            currentLong = strtol(dest, &p, 2);
+                                            printBin(currentLong);
+                                        }
+
+{DEC_DIGIT}L                            {
                                             buffer[0] = '\0';
                                             strcat(buffer, yytext);
                                             removeChar(buffer, '_');
-                                            currentDouble = atof(buffer);
-                                            printDouble(currentFloat);
+                                            char *p;
+                                            currentLong = strtol(buffer, &p, 10);;
+                                            printLong(currentLong);
                                         }
 
-DOUBLEf                                 {
+{DOUBLEF}                               {
                                             buffer[0] = '\0';
                                             strcat(buffer, yytext);
                                             removeChar(buffer, '_');
@@ -352,6 +380,13 @@ DOUBLEf                                 {
                                             printFloat(currentFloat);
                                         }
 
+{DOUBLE}                                {
+                                            buffer[0] = '\0';
+                                            strcat(buffer, yytext);
+                                            removeChar(buffer, '_');
+                                            currentFloat = atof(buffer);
+                                            printDouble(currentFloat);
+                                        }
 
 {DEC_NUMBER}                            {
                                             buffer[0] = '\0';
@@ -361,35 +396,12 @@ DOUBLEf                                 {
                                             printInteger(currentInteger);
                                         }
 
-{DEC_NUMBER}L                           {
-                                            buffer[0] = '\0';
-                                            strcat(buffer, yytext);
-                                            removeChar(buffer, '_');
-                                            char *p;
-                                            currentLong = strtol(buffer, &p, 10);;
-                                            printLong(currentLong);
-                                        }
-
-0x{HEX_DIGIT}+                          {
-                                            buffer[0] = '\0';
-                                            strcat(buffer, yytext);
-                                            currentInteger = atoi(buffer);
-                                            printInteger(currentInteger);
-                                        }
-
-0b{BIN_DIGIT}+                          {
-                                            buffer[0] = '\0';
-                                            strcat(buffer, yytext);
-                                            currentInteger = atoi(buffer);
-                                            printInteger(currentInteger);
-                                        }
-
 [a-zA-Z_][a-zA-Z0-9_]*                  {
                                             printIdentifier(yytext);
                                         }
 
 
-[\s\n]+                                     { /* no action */ }
+[\s\n]+                                 { /* no action */ }
 
 %%
 
@@ -444,6 +456,16 @@ void printArithmeticOperator(const char* o)
 void printInteger(int i)
 {
     printf("Found integer: %d\n", i);
+}
+
+void printHex(int i)
+{
+    printf("Found hex: %d\n", i);
+}
+
+void printBin(int i)
+{
+    printf("Found bin: %d\n", i);
 }
 
 void printLong(long int i)
